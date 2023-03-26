@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# Function to check subdomain records
+check_subdomain_record() {
+  subdomain=$1
+  domain=$2
+
+  # Retrieve DNS records for subdomain
+  dns_records=$(dig +short $subdomain.$domain)
+
+  # Check if DNS records are found
+  if [[ -z $dns_records ]]; then
+    echo "No DNS record found for subdomain $subdomain"
+  else
+    # Loop through DNS records
+    for record in $dns_records; do
+      # Determine record type
+      if [[ $record =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        record_type="A"
+      else
+        record_type=$(dig +short -t $record $subdomain.$domain | awk '{print $4}')
+      fi
+      
+      # Print record information
+      echo "The subdomain $subdomain is a $record_type record and points to $record"
+    done
+  fi
+}
+
+# Get domain and subdomain arguments
+domain=$1
+subdomain=$2
+
+# If subdomain is not provided, check default subdomains
+if [[ -z $subdomain ]]; then
+  check_subdomain_record www $domain
+  check_subdomain_record lb-01 $domain
+  check_subdomain_record web-01 $domain
+  check_subdomain_record web-02 $domain
+else
+  check_subdomain_record $subdomain $domain
+fi
+
