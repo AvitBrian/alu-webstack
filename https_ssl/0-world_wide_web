@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-
 # Function to check subdomain records
+
 check_subdomain_record() {
   subdomain=$1
   domain=$2
